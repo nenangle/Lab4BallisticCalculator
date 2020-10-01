@@ -16,7 +16,8 @@ def trajectoryGraph(bullet, atmosphere):
     # CROSSWIND & DIRECTION DEFAULTS 0
     crosswind = atmosphere[0]
     windDirection = atmosphere[1]
-    velocity = bullet[3]
+    velocity = bullet[3] / 3.281
+    #print("velocity: ", velocity)
     elevation_angle = atmosphere[2] / float(1000)
     windage_angle = atmosphere[3] / float(1000)
     # bullet = bullet
@@ -107,13 +108,13 @@ def trajectoryGraph(bullet, atmosphere):
         #     return_info = calculation(bullet[4], elevation_angle, windage_angle, elevation_graph, distance_graph,
         #                               windage_graph, simTime, time_interval)
         # return return_info
-    returned_thing = calculation(bullet[4], elevation_angle, windage_angle, elevation_graph, distance_graph,
-                    windage_graph, simTime, time_interval)
-    print("adjustments string: ", returned_thing)
+    returned_thing = calculation((bullet[4]/1.094), elevation_angle, windage_angle, elevation_graph, distance_graph,
+                    windage_graph, simTime, time_interval, velocity_graph)
+    #print("vertical: ", returned_thing[0], " horizontal: ", returned_thing[1], " vel: ", returned_thing[2]*3.281)
     return returned_thing
 # ---------------------------------------------------------------------------------------------------------------------------
 
-def calculation(distance, elevation_angle, windage_angle, elevation_graph, distance_graph, windage_graph, simTime, time_intereval):
+def calculation(distance, elevation_angle, windage_angle, elevation_graph, distance_graph, windage_graph, simTime, time_intereval, velocity):
     adjustments = {"elevation": 0, "windage": 0}
     stop = False
     previous_elevation_angle = 0
@@ -160,7 +161,7 @@ def calculation(distance, elevation_angle, windage_angle, elevation_graph, dista
         adjustments1["deflection"] = 39.3701*windage_graph[index]
         if(array_length < len(elevation_graph)):
 
-            adjustments_arr = [39.3701*elevation_graph[index],39.3701*windage_graph[index]]
+            adjustments_arr = [39.3701*elevation_graph[index],39.3701*windage_graph[index],velocity[index]]
 
             adjustments_arr.sort()
             return adjustments_arr
@@ -219,8 +220,8 @@ def main():
     while ready == False:
 
 
-        bullet = [0.308, 110, 0.49, 1014, 92]  # bullet[caliber, grainage, G1, velocity, range]
-        atmosphere = [20, 0, 0,0,1.183]  # atmosphere[crosswind, direction, elevation, windage]
+        # bullet = [0.308, 110, 0.49, 1014, 92]  # bullet[caliber, grainage, G1, velocity, range]
+        # atmosphere = [20, 0, 0,0,1.183]  # atmosphere[crosswind, direction, elevation, windage]
 
         ready = True
 

@@ -42,7 +42,7 @@ def Frame2DynamicAttributes(bullet_speed, target_range, bullet):
     x1 = 105
     y = 95
     y1 = 105
-
+    simlist = SimulatedConditions.LoadData()
     first_iteration = True
     iframe1 = Frame(f2, relief=RAISED, bd=2)
     iframe1.grid(column=10, row=12)
@@ -58,9 +58,10 @@ def Frame2DynamicAttributes(bullet_speed, target_range, bullet):
 
     mover = c.create_oval(x, y, x1, y1, fill="red")
     ball_pos = [0,0]
+    count = 2
     while 1:
         deflection1 = []
-        windspeed = int(SimulatedConditions.windspeed())
+        windspeed = float(SimulatedConditions.windspeed(count, simlist))
         winddir = int(SimulatedConditions.winddir())
         density = 1.183
         atmosphere = [windspeed, winddir, 0, 0, density]
@@ -85,15 +86,17 @@ def Frame2DynamicAttributes(bullet_speed, target_range, bullet):
         Label(f2, text="pressure is currently (inHg): ").grid(column=1, row=10)
         Label(f2, text=pressure).grid(column=2, row=10)
 
-        move_x = BulletPhysicsWind(int(bullet_speed), int(target_range), first_iteration, ball_pos, bullet, atmosphere)
-        move_y = BulletPhysicsGravity(int(bullet_speed), int(target_range), first_iteration, ball_pos, bullet, atmosphere)
+        move_x = BulletPhysicsWind(int(bullet_speed), int(target_range), first_iteration, ball_pos, bullet, atmosphere,f2)
+
+
+        move_y = BulletPhysicsGravity(int(bullet_speed), int(target_range), first_iteration, ball_pos, bullet, atmosphere,f2)
         c.move(mover, move_x, move_y) #, ball_pos)
         ball_pos = BallCenter(c.coords(mover))
         print("Cords are: ", ball_pos)
         first_iteration = False
         time.sleep(.01)
         root.update()
-
+        count += 1
 #---------------------------------------------------------------------------------------------------------------
 def BallCenter(coor):
     x = (coor[0] + coor[2])/2
@@ -103,7 +106,7 @@ def BallCenter(coor):
 
 # ---------------------------------------------------------------------------------------------------------------
 
-def BulletPhysicsWind(speed, range1, iteration, position, bullet, atmosphere): # atmosphere[crosswind, direction, elevation, windage, density]
+def BulletPhysicsWind(speed, range1, iteration, position, bullet, atmosphere,f2): # atmosphere[crosswind, direction, elevation, windage, density]
 
     # test_speed = speed - speed*(range1/1000)
     # test_time = (range1*3) / test_speed
@@ -112,6 +115,9 @@ def BulletPhysicsWind(speed, range1, iteration, position, bullet, atmosphere): #
     deflection1 = Ballistics.trajectoryGraph(bullet, atmosphere) #-(wind_vect * (((test_time) - (range1 / speed)))) #deflection goes in the opposite direction of the wind direction
 
     deflection1.sort()
+
+    Label(f2, text="horizontal deflection: ").grid(column=1, row=11)
+    Label(f2, text=deflection1[1]).grid(column=2, row=11)
 
     deflection = (-1)*deflection1[1]
     def_2_pix = (deflection / 24) * 200
@@ -149,14 +155,18 @@ def BulletPhysicsWind(speed, range1, iteration, position, bullet, atmosphere): #
 
 # ---------------------------------------------------------------------------------------------------------------
 
-def BulletPhysicsGravity(speed, range1, iteration, position, bullet, atmosphere): #assuming no friction
+def BulletPhysicsGravity(speed, range1, iteration, position, bullet, atmosphere, f2): #assuming no friction
     test_speed = speed - speed * (range1 / 1000)
     travel_time = (range1 * 3) / test_speed  # t = d / v
 
     drop = 0.5 * (32.185) * (travel_time * travel_time)
-    drop_2_pix = (drop / 24) * 200
+
     deflection1 = Ballistics.trajectoryGraph(bullet, atmosphere)
 
+    Label(f2, text="vertical deflection: ").grid(column=1, row=12)
+    Label(f2, text=deflection1[0]).grid(column=2, row=12)
+
+    drop_2_pix = -(deflection1[0] / 24) * 200
     if(iteration):              # if first iteration, move down
         return int(drop_2_pix)
     else:                       # return 0 so animation doesnt continue to fall (change later)
@@ -190,12 +200,12 @@ ballistic_entry.grid(column = 2, row = 3)
 
 Label(f1, text='Enter Bullet Velocity (FPS)').grid(column = 1, row = 4)
 velocity_entry = Entry(f1,width = 5)
-velocity_entry.insert(0,'1015')
+velocity_entry.insert(0,'2500')
 velocity_entry.grid(column = 2, row = 4)
 
 Label(f1, text='Enter Target Distance (yards)').grid(column = 1, row = 5)
 distance_entry = Entry(f1,width = 5)
-distance_entry.insert(0,'92')
+distance_entry.insert(0,'100')
 distance_entry.grid(column = 2, row = 5)
 
 Label(f1, text='Press Enter When Done').grid(column = 1, row = 6)
