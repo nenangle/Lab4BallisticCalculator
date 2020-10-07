@@ -7,29 +7,39 @@ def LoadData():
     wb = xlrd.open_workbook(exc)
     sheet = wb.sheet_by_index(0)
     windlist = [0]
-    for i in range(2, sheet.nrows):
-        windlist.append(round(2.2 * sheet.cell_value(i, 6)))
+    for i in range(2, 1000):
+        windlist.append(sheet.cell_value(i, 7))
     return windlist
 
 def windspeed(i, data_list):
-    exc = r"C:\Users\Nathan Nangle\Desktop\Lab 4\weather.xlsx"
-    wb = xlrd.open_workbook(exc)
-    sheet = wb.sheet_by_index(0)
-    #data_list = [0]
-
-    #wind = data_list[i]
     wind_str = str(data_list[i])
     time.sleep(.05)
-    #print("Windspeed: ", wind_str, " data point: ", i)
     return wind_str
 
-def winddir():
-    for x in range(0, 1000):
+def winddir(c):
+    #for x in range(0, 1000):
+    if c < 20:
         wind_d = 45 #from right
-        # wind_d = random.randint(40, 50)
         wind_di = str(wind_d)
         time.sleep(.05)
         return wind_di
+    elif c >= 20 and c < 40:
+        wind_d = 80
+        wind_di = str(wind_d)
+        time.sleep(.05)
+        return wind_di
+    elif c >= 40 and c < 60:
+        wind_d = 90
+        wind_di = str(wind_d)
+        time.sleep(.05)
+        return wind_di
+    else:
+        wind_d = 45
+        wind_di = str(wind_d)
+        time.sleep(.05)
+        return wind_di
+        
+    
 
 def temp():
     for x in range(0, 1000):

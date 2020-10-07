@@ -85,7 +85,11 @@ def trajectoryGraph(bullet, atmosphere):
         # velocity_x_instant is instantaneous velocity at current distance down range (x direction)
         # dist_x_instant is current distance downrange
         # Since solved iteratively, instant is for start of the loop, updated for the end
+        
+        #NOTE: the author may have switched up the following 2 lines
         velocity_x_instant = velocity_x_instant_updated
+        #velocity_x_instant_updated = velocity_x_instant
+        
         dist_x_instant = dist_x_instant_updated
         # Bullet Drop due to Gravity
         # my'' = -mg
@@ -100,7 +104,6 @@ def trajectoryGraph(bullet, atmosphere):
         elevation_graph.append(dist_z_instant)
         velocity_graph.append(velocity_x_instant_updated)
         windage_graph.append(total_deflection)
-
         # return_info = [0,0,0]
         # while return_info[2] != 1:
         #     print("ret: ", return_info)
@@ -137,7 +140,7 @@ def calculation(distance, elevation_angle, windage_angle, elevation_graph, dista
 
         wind_deflection = windage_graph[index]
         windage_adjustment = -1 * wind_deflection / distance
-
+        
         stop = True
         # if unit == 'yd':
         #distance = distance*1.09361
@@ -159,6 +162,8 @@ def calculation(distance, elevation_angle, windage_angle, elevation_graph, dista
         array_length = simTime / time_intereval
         adjustments1["elevation"] = 39.3701*elevation_graph[index]
         adjustments1["deflection"] = 39.3701*windage_graph[index]
+        print("Distance graph: ", 39.3701*distance_graph[index])
+
         if(array_length < len(elevation_graph)):
 
             adjustments_arr = [39.3701*elevation_graph[index],39.3701*windage_graph[index],velocity[index]]
