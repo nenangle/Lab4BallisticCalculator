@@ -162,8 +162,10 @@ def calculation(distance, elevation_angle, windage_angle, elevation_graph, dista
         array_length = simTime / time_intereval
         adjustments1["elevation"] = 39.3701*elevation_graph[index]
         adjustments1["deflection"] = 39.3701*windage_graph[index]
-        print("Distance graph: ", 39.3701*distance_graph[index])
-
+        print("Distance graph: ", distance_graph[index])
+        print("Elev graph: ", elevation_graph[index])
+        print("Wind graph: ", windage_graph[index], " / ", index)
+        
         if(array_length < len(elevation_graph)):
 
             adjustments_arr = [39.3701*elevation_graph[index],39.3701*windage_graph[index],velocity[index]]

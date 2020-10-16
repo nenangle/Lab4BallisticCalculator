@@ -86,10 +86,15 @@ def Frame2DynamicAttributes(bullet_speed, target_range, bullet):
     
         hash_counter += 1
 
-    c.create_text(((size/2) - 20), 10, text = "90")
-    c.create_text(((size) - 10), ((size/2) - 20), text = "0")
-    c.create_text(((size/2) - 20), ((size) - 10), text = "270")
-    c.create_text(10, ((size/2) - 20), text = "180")
+    # c.create_text(((size/2) - 20), 10, text = "90")
+    # c.create_text(((size) - 10), ((size/2) - 20), text = "0")
+    # c.create_text(((size/2) - 20), ((size) - 10), text = "270")
+    # c.create_text(10, ((size/2) - 20), text = "180")
+
+    c.create_text(((size / 2) - 20), 10, text="0")
+    c.create_text(((size) - 10), ((size / 2) - 20), text="90")
+    c.create_text(((size / 2) - 20), ((size) - 10), text="180")
+    c.create_text(10, ((size / 2) - 20), text="270")
 
     mover = c.create_oval(x, y, x1, y1, fill="red") #where bullet will land if aim is directly at center
     inverse_mover = c.create_oval(x, y, x1, y1, fill="blue") #where to aim
