@@ -1,12 +1,8 @@
 import serial
 import datetime as dt
-import time
 
-arduino = serial.Serial('COM3', 115200, timeout=.1)
+arduino = serial.Serial('COM4', 115200, timeout=.1)
 
-
-# time.sleep(1)
-# start_time2 = dt.datetime.today().timestamp()
 def RemoveExcessChars(message_str):
 	rep_str = ''
 	if message_str[0] == 'b':
@@ -17,33 +13,35 @@ def RemoveExcessChars(message_str):
 	
 	return rep_str
 
-
 def split(word):
 	return [char for char in word]
-
 
 start_time = dt.datetime.today().timestamp()
 print("Start: ", start_time)
 count = False
 counter = 0
-for i in range(0, 50, 1):
-	# while True: #(dt.datetime.today().timestamp()-start_time) < 1:
-	# counter = counter + 1
-	# if(count == False):
-	#     start_actual = dt.datetime.today().timestamp()
-	#     print("Start loop: ", start_actual)
-	# count = True
-	
+while True:
+
 	data = arduino.readline()
 	data1 = list(data)
+	print("Data: ", data1)
 	
-	if len(data1) > 2:
-		data1.pop(len(data1) - 1)
-		data1.pop(len(data1) - 1)
-		print("Data: ", data1)
+	# if len(data1) > 2:
+	# 	data1.pop(len(data1) - 1)
+	# 	data1.pop(len(data1) - 1)
+	# 	print("Data: ", data1)
 
-stop_time = dt.datetime.today().timestamp()
-print(stop_time - start_time)
+# stop_time = dt.datetime.today().timestamp()
+# print(stop_time - start_time)
+
+
+
+
+
+
+
+
+
 # print("Lasttime: ", dt.datetime.today().timestamp())
 # print("Diff: ", start_actual - start_time)
 # print("Diff2: ", dt.datetime.today().timestamp() - start_time)
