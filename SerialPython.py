@@ -1,35 +1,37 @@
 import serial
-import datetime as dt
 
-arduino = serial.Serial('COM4', 115200, timeout=.1)
+arduino = serial.Serial('COM5', 115200, timeout=.1)
 
-def RemoveExcessChars(message_str):
-	rep_str = ''
-	if message_str[0] == 'b':
-		rep_str = message_str.replace('b', '')
-	
-	if "'" in rep_str:
-		rep_str = rep_str.replace("'", '')
-	
-	return rep_str
-
-def split(word):
-	return [char for char in word]
-
-start_time = dt.datetime.today().timestamp()
-print("Start: ", start_time)
-count = False
-counter = 0
+data_1 = 0
+data_2 = 0
+data_1_old = 0
+data_2_old = 0
 while True:
 
-	data = arduino.readline()
-	data1 = list(data)
-	print("Data: ", data1)
+	data = list(arduino.readline())
+	data1 = data
 	
+	if len(data) > 1:
+		if data[0] == 2:
+			data.pop(len(data) - 1)
+			data.pop(len(data) - 1)
+			data_1 = data
+		elif data[0] == 3:
+			data.pop(len(data) - 1)
+			data.pop(len(data) - 1)
+			data_2 = data
+
+	if (data_1 != data_1_old) and data_2:
+		print("Transmitter 1: ", data_1, " Transmitter 2: ", data_2)
+	data_1_old = data_1
+	data_2_old = data_2
+	
+	
+	# print(data)
 	# if len(data1) > 2:
 	# 	data1.pop(len(data1) - 1)
 	# 	data1.pop(len(data1) - 1)
-	# 	print("Data: ", data1)
+	# 	print(data1)
 
 # stop_time = dt.datetime.today().timestamp()
 # print(stop_time - start_time)
@@ -66,3 +68,18 @@ while True:
 #      x = ser.read()          # read one byte
 #      s = ser.read(10)        # read up to ten bytes (timeout)
 #      line = ser.readline()   # read a '\n' terminated line
+
+
+# def RemoveExcessChars(message_str):
+# 	rep_str = ''
+# 	if message_str[0] == 'b':
+# 		rep_str = message_str.replace('b', '')
+#
+# 	if "'" in rep_str:
+# 		rep_str = rep_str.replace("'", '')
+#
+# 	return rep_str
+#
+#
+# def split(word):
+# 	return [char for char in word]

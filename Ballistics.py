@@ -119,14 +119,15 @@ def trajectoryGraph(bullet, atmosphere):
 
 def calculation(distance, elevation_angle, windage_angle, elevation_graph, distance_graph, windage_graph, simTime, time_intereval, velocity):
     adjustments = {"elevation": 0, "windage": 0}
-    stop = False
-    previous_elevation_angle = 0
-    previous_windage_angle = 0
     # If yards is used for desired distance, convert from meters
     # if unit == 'yd':
     #     distance = distance/1.09361
-
+    #print("Distance Graph Full: ", distance_graph, " Len: ", len(distance_graph))
+    stop = False
+    previous_elevation_angle = 0
+    previous_windage_angle = 0
     while stop != True:
+        print("Made it here: 1")
         index = 0
         count = 0
         for item in distance_graph:
@@ -136,42 +137,56 @@ def calculation(distance, elevation_angle, windage_angle, elevation_graph, dista
                 count += 1
 
         bullet_drop = elevation_graph[index]
+        print("Bullet drop: ", bullet_drop)
         drop_adjustment = -1 * bullet_drop / distance
-
+        print("drop adjustment: ", drop_adjustment)
         wind_deflection = windage_graph[index]
         windage_adjustment = -1 * wind_deflection / distance
         
-        stop = True
-        # if unit == 'yd':
-        #distance = distance*1.09361
-        # print("MIL Elevation Adjustment for " + str(distance) + "m is " + str(round(elevation_angle * 1000, 1)))
-        # print("MOA Elevation Adjustment for " + str(distance) + "m is " + str(round(elevation_angle * 1000 * 3.44, 1)))
-        # print("MIL Windage Adjustment for " + str(distance) + "m is " + str(round(windage_angle * 1000, 1)))
-        # print("MOA Windage Adjustment for " + str(distance) + "m is " + str(round(windage_angle * 1000 * 3.44, 1)))
-        adjustments1 = {}
-        adjustments["elevation"] = round(elevation_angle * 1000, 1)
-        adjustments["windage"] = round(windage_angle * 1000, 1)
-
-        # print("bullet drop: ", 39.3701*elevation_graph[index])
-        # print("length of elev:", len(elevation_graph))
-        # print("wind_deflection: ", 39.3701*windage_graph[index])
-        # print("length of wind:", len(windage_graph))
-        # print(distance_graph)
-
-
-        array_length = simTime / time_intereval
-        adjustments1["elevation"] = 39.3701*elevation_graph[index]
-        adjustments1["deflection"] = 39.3701*windage_graph[index]
-        print("Distance graph: ", distance_graph[index])
-        print("Elev graph: ", elevation_graph[index])
-        print("Wind graph: ", windage_graph[index], " / ", index)
-        
-        if(array_length < len(elevation_graph)):
-
-            adjustments_arr = [39.3701*elevation_graph[index],39.3701*windage_graph[index],velocity[index]]
-
-            adjustments_arr.sort()
-            return adjustments_arr
+        if math.fabs(drop_adjustment) > 0.00001:
+            print("Made it here: 2")
+            elevation_angle = previous_elevation_angle + drop_adjustment
+            previous_elevation_angle = elevation_angle
+            print("elev angle: ", elevation_angle)
+        elif math.fabs(windage_adjustment) > 0.00001:
+            print("Made it here: 3")
+            windage_angle = previous_windage_angle + windage_adjustment
+            previous_windage_angle = windage_angle
+            print("wind angle: ", windage_angle)
+        else:
+            print("Made it here: 4")
+            stop = True
+            # if unit == 'yd':
+            #distance = distance*1.09361
+            # print("MIL Elevation Adjustment for " + str(distance) + "m is " + str(round(elevation_angle * 1000, 1)))
+            print("MOA Elevation Adjustment for " + str(distance) + "m is " + str(round(elevation_angle * 1000 * 3.44, 1)))
+            # print("MIL Windage Adjustment for " + str(distance) + "m is " + str(round(windage_angle * 1000, 1)))
+            print("MOA Windage Adjustment for " + str(distance) + "m is " + str(round(windage_angle * 1000 * 3.44, 1)))
+            adjustments["elevation"] = round(elevation_angle * 1000, 1)
+            adjustments["windage"] = round(windage_angle * 1000, 1)
+            #adjustments["elevation"] = round(elevation_angle * 1000, 1)
+            #adjustments["windage"] = round(windage_angle * 1000, 1)
+    
+            # print("bullet drop: ", 39.3701*elevation_graph[index])
+            # print("length of elev:", len(elevation_graph))
+            # print("wind_deflection: ", 39.3701*windage_graph[index])
+            # print("length of wind:", len(windage_graph))
+            # print(distance_graph)
+    
+    
+            array_length = simTime / time_intereval
+            # adjustments1["elevation"] = 39.3701*elevation_graph[index]
+            # adjustments1["deflection"] = 39.3701*windage_graph[index]
+            # print("Distance graph: ", distance_graph[index])
+            # print("Elev graph: ", elevation_graph[index])
+            # print("Wind graph: ", windage_graph[index], " / ", index)
+            
+            if(array_length < len(elevation_graph)):
+    
+                adjustments_arr = [39.3701*elevation_graph[index],39.3701*windage_graph[index],velocity[index]]
+    
+                adjustments_arr.sort()
+                return adjustments_arr
 
         #return adjustments
 
