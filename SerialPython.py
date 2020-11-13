@@ -1,42 +1,66 @@
 import serial
+import time
 
-arduino = serial.Serial('COM5', 115200, timeout=.1)
+arduino = serial.Serial('COM4', 115200, timeout=.1)
 
-data_1 = 0
-data_2 = 0
-data_1_old = 0
-data_2_old = 0
+data_1, data_2, data_1_old, data_2_old = 0, 0 ,0, 0
 while True:
-
-	data = list(arduino.readline())
-	data1 = data
+	data1 = list(arduino.readline())
 	
-	if len(data) > 1:
-		if data[0] == 2:
-			data.pop(len(data) - 1)
-			data.pop(len(data) - 1)
-			data_1 = data
-		elif data[0] == 3:
-			data.pop(len(data) - 1)
-			data.pop(len(data) - 1)
-			data_2 = data
+	if len(data1) > 4:
+		data1.pop(len(data1) - 1)
+		data1.pop(len(data1) - 1)
+		if data1[0] == 2 and len(data1) == 3:
+			data_1 = data1
+			
+		elif data1[0] == 3 and len(data1) == 3:
+			data_2 = data1
+			
+		elif data1[0] == 2 and len(data1) == 5:
+			chrono_data1 = int.from_bytes([data1[3], data1[4]], byteorder='big')
+			fps = 1 / (chrono_data1 * 0.000001)
+			print("\nchrono: ", fps, " FPS\n")
+			time.sleep(1)
+			
+		elif data1[0] == 3 and len(data1) == 5:
+			chrono_data1 = int.from_bytes([data1[3], data1[4]], byteorder='big')
+			fps = 1/(chrono_data1*0.000001)
+			print("\nchrono: ", fps, " FPS\n")
+			time.sleep(1)
 
-	if (data_1 != data_1_old) and data_2:
+	if (data_1 != data_1_old) and data_2:#(data_2 != data_2_old):
 		print("Transmitter 1: ", data_1, " Transmitter 2: ", data_2)
 	data_1_old = data_1
 	data_2_old = data_2
 	
 	
-	# print(data)
+	# print(data1)
+	# chrono_data = []
+	#chrono_data1 = 0
+	# # res = ""
 	# if len(data1) > 2:
 	# 	data1.pop(len(data1) - 1)
 	# 	data1.pop(len(data1) - 1)
 	# 	print(data1)
+		# if data1:
+		# 	for h in data1:
+		# 		res = res + chr(h)
+		# 	#time.sleep(1)
+		# 	print("chrono2: ", res)
+		# print(data1)
 
 # stop_time = dt.datetime.today().timestamp()
 # print(stop_time - start_time)
 
 
+# if len(data1) == 7:
+# 	# chrono_data[0] = int.from_bytes(data1[3])
+# 	# chrono_data[1] = int.from_bytes(data1[4])
+# 	# chrono_data[2] = int.from_bytes(data1[5])
+# 	# chrono_data[3] = int.from_bytes(data1[6])
+# 	chrono_data1 = int.from_bytes([data1[3], data1[4], data1[5], data1[6]], byteorder='big')
+# 	time.sleep(1)
+# 	print("chrono: ", chrono_data1)
 
 
 

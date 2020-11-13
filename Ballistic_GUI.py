@@ -19,7 +19,7 @@ def SubWindDir(current_wind):
     new_windD = current_wind - 1
     return new_windD
     
-def Frame2Attributes(f2, cal, dia, coef, speed, dist):
+def Frame2Attributes(f2, cal, dia, coef, speed, dist, sight_height, zero_dist):
     raise_frame(f2)
     cal_text = "your caliber: " + str(cal)
     dia_text = "your grainage: " + str(dia)
@@ -113,7 +113,7 @@ def Frame2DynamicAttributes(bullet_speed, target_range, bullet):
         windspeed = float(SimulatedConditions.windspeed(count, simlist))
         winddir = float(SimulatedConditions.winddir(count))
         density = 1.183
-        print("wind d: ", winddir, " / ", count)
+        # print("wind d: ", winddir, " / ", count)
 
         Label(f2, text = "wind speed is currently (MPH): ").grid(column= 1, row=6)
         Label(f2, text= windspeed).grid(column=2, row=6)
@@ -154,7 +154,7 @@ def Frame2DynamicAttributes(bullet_speed, target_range, bullet):
         c.move(inv_mover_line_y, 0, -move_y[1])
         
         ball_pos = BallCenter(c.coords(mover))
-        print("Cords are: ", ball_pos)
+        # print("Cords are: ", ball_pos)
         first_iteration = False
         time.sleep(.01)
         root.update()
@@ -212,9 +212,13 @@ def BulletPhysicsGravity(size, range1, iteration, position, bullet, atmosphere, 
     y_movement = [0,0]
     
     deflection1 = Ballistics.trajectoryGraph(bullet, atmosphere)
+    # print("def: ", deflection1[0])
     y_movement[0] = deflection1[0]
 
-    drop_2_pix = -(deflection1[0] / target_size) * size
+    # drop_2_pix = -(deflection1[0] / target_size) * size
+    drop_2_pix = round(deflection1[0] * 10)
+
+    # print("targ: ", target_size, " size: ", size, " drop: ", drop_2_pix)
     int_drop_2_pix = int(drop_2_pix)
 
     position_vector_old = position[1] - (size / 2)  # old position distance from x-axis
@@ -251,24 +255,26 @@ for frame in (f1, f2):
 root.title("Ballistic Calculator")
 root.geometry("650x550")
 
+
+
 Label(f1, text='Enter Bullet Diameter (in)').grid(column = 1, row = 1)
 cal_entry = Entry(f1,width = 5)
-cal_entry.insert(0,'0.308')
+cal_entry.insert(0,'0.30')
 cal_entry.grid(column = 2, row = 1)
 
 Label(f1, text='Enter Bullet Grain').grid(column = 1, row = 2)
 bullet_entry = Entry(f1,width = 5)
-bullet_entry.insert(0,'110')
+bullet_entry.insert(0,'168')
 bullet_entry.grid(column = 2, row = 2)
 
 Label(f1, text='Enter Ballistic Coefficient (G1)').grid(column = 1, row = 3)
 ballistic_entry = Entry(f1,width = 5)
-ballistic_entry.insert(0,'0.29')
+ballistic_entry.insert(0,'0.49')
 ballistic_entry.grid(column = 2, row = 3)
 
 Label(f1, text='Enter Bullet Velocity (FPS)').grid(column = 1, row = 4)
 velocity_entry = Entry(f1,width = 5)
-velocity_entry.insert(0,'2500')
+velocity_entry.insert(0,'2600')
 velocity_entry.grid(column = 2, row = 4)
 
 Label(f1, text='Enter Target Distance (yards)').grid(column = 1, row = 5)
@@ -276,8 +282,18 @@ distance_entry = Entry(f1,width = 5)
 distance_entry.insert(0,'100')
 distance_entry.grid(column = 2, row = 5)
 
-Label(f1, text='Press Enter When Done').grid(column = 1, row = 6)
-Button(f1, text='Enter', command=lambda:Frame2Attributes(f2, cal_entry.get(), bullet_entry.get(), ballistic_entry.get(), velocity_entry.get(), distance_entry.get())).grid(column = 2, row = 6)
+Label(f1, text='Enter Sight Height (in)').grid(column = 1, row = 6)
+sight_height_entry = Entry(f1,width = 5)
+sight_height_entry.insert(0,'1.5')
+sight_height_entry.grid(column = 2, row = 6)
+
+Label(f1, text='Enter Zero Distance (yards)').grid(column = 1, row = 7)
+zero_dist_entry = Entry(f1,width = 5)
+zero_dist_entry.insert(0,'100')
+zero_dist_entry.grid(column = 2, row = 7)
+
+Label(f1, text='Press Enter When Done').grid(column = 1, row = 8)
+Button(f1, text='Enter', command=lambda:Frame2Attributes(f2, cal_entry.get(), bullet_entry.get(), ballistic_entry.get(), velocity_entry.get(), distance_entry.get(), sight_height_entry.get(), zero_dist_entry.get())).grid(column = 2, row = 8)
 
 
 raise_frame(f1)

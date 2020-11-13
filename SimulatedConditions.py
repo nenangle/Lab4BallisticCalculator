@@ -12,7 +12,8 @@ def LoadData():
     return windlist
 
 def windspeed(i, data_list):
-    wind_str = str(data_list[i])
+    # wind_str = str(data_list[i])
+    wind_str = 0
     time.sleep(.05)
     return wind_str
 
@@ -43,21 +44,24 @@ def winddir(c):
 
 def temp():
     for x in range(0, 1000):
-        temper = random.randint(60, 62)
+        # temper = random.randint(60, 62)
+        temper = 60
         temp_str = str(temper)
         time.sleep(.05)
         return temp_str
 
 def hum():
     for x in range(0, 1000):
-        humi = random.randint(50, 53)
+        # humi = random.randint(50, 53)
+        humi = 50
         humi_str = str(humi)
         time.sleep(.05)
         return humi_str
 
 def pres():
     for x in range(0, 1000):
-        press = random.randint(29, 30)
+        # press = random.randint(29, 30)
+        press = 30
         press_str = str(press)
         time.sleep(.05)
         return press_str

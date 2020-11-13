@@ -7,6 +7,9 @@ import datetime
 def trajectoryGraph(bullet, atmosphere):
     simTime = 2
     time_interval = .01
+    time_graph = []
+    for m in range(0, int(simTime/time_interval)):
+        time_graph.append(m)
     steps = int(math.floor(simTime / time_interval))
 
     # bullet[caliber, grainage, G1, velocity, range]
@@ -112,12 +115,12 @@ def trajectoryGraph(bullet, atmosphere):
         #                               windage_graph, simTime, time_interval)
         # return return_info
     returned_thing = calculation((bullet[4]/1.094), elevation_angle, windage_angle, elevation_graph, distance_graph,
-                    windage_graph, simTime, time_interval, velocity_graph)
+                    windage_graph, simTime, time_interval, velocity_graph, time_graph)
     #print("vertical: ", returned_thing[0], " horizontal: ", returned_thing[1], " vel: ", returned_thing[2]*3.281)
     return returned_thing
 # ---------------------------------------------------------------------------------------------------------------------------
 
-def calculation(distance, elevation_angle, windage_angle, elevation_graph, distance_graph, windage_graph, simTime, time_intereval, velocity):
+def calculation(distance, elevation_angle, windage_angle, elevation_graph, distance_graph, windage_graph, simTime, time_intereval, velocity_graph, time_graph):
     adjustments = {"elevation": 0, "windage": 0}
     # If yards is used for desired distance, convert from meters
     # if unit == 'yd':
@@ -127,7 +130,7 @@ def calculation(distance, elevation_angle, windage_angle, elevation_graph, dista
     previous_elevation_angle = 0
     previous_windage_angle = 0
     while stop != True:
-        print("Made it here: 1")
+        # print("Made it here: 1")
         index = 0
         count = 0
         for item in distance_graph:
@@ -137,56 +140,60 @@ def calculation(distance, elevation_angle, windage_angle, elevation_graph, dista
                 count += 1
 
         bullet_drop = elevation_graph[index]
-        print("Bullet drop: ", bullet_drop)
+        # print("Bullet drop: ", bullet_drop)
         drop_adjustment = -1 * bullet_drop / distance
-        print("drop adjustment: ", drop_adjustment)
+        # print("drop adjustment: ", drop_adjustment)
         wind_deflection = windage_graph[index]
         windage_adjustment = -1 * wind_deflection / distance
         
-        if math.fabs(drop_adjustment) > 0.00001:
-            print("Made it here: 2")
-            elevation_angle = previous_elevation_angle + drop_adjustment
-            previous_elevation_angle = elevation_angle
-            print("elev angle: ", elevation_angle)
-        elif math.fabs(windage_adjustment) > 0.00001:
-            print("Made it here: 3")
-            windage_angle = previous_windage_angle + windage_adjustment
-            previous_windage_angle = windage_angle
-            print("wind angle: ", windage_angle)
-        else:
-            print("Made it here: 4")
-            stop = True
-            # if unit == 'yd':
-            #distance = distance*1.09361
-            # print("MIL Elevation Adjustment for " + str(distance) + "m is " + str(round(elevation_angle * 1000, 1)))
-            print("MOA Elevation Adjustment for " + str(distance) + "m is " + str(round(elevation_angle * 1000 * 3.44, 1)))
-            # print("MIL Windage Adjustment for " + str(distance) + "m is " + str(round(windage_angle * 1000, 1)))
-            print("MOA Windage Adjustment for " + str(distance) + "m is " + str(round(windage_angle * 1000 * 3.44, 1)))
-            adjustments["elevation"] = round(elevation_angle * 1000, 1)
-            adjustments["windage"] = round(windage_angle * 1000, 1)
-            #adjustments["elevation"] = round(elevation_angle * 1000, 1)
-            #adjustments["windage"] = round(windage_angle * 1000, 1)
-    
-            # print("bullet drop: ", 39.3701*elevation_graph[index])
-            # print("length of elev:", len(elevation_graph))
-            # print("wind_deflection: ", 39.3701*windage_graph[index])
-            # print("length of wind:", len(windage_graph))
-            # print(distance_graph)
-    
-    
-            array_length = simTime / time_intereval
-            # adjustments1["elevation"] = 39.3701*elevation_graph[index]
-            # adjustments1["deflection"] = 39.3701*windage_graph[index]
-            # print("Distance graph: ", distance_graph[index])
-            # print("Elev graph: ", elevation_graph[index])
-            # print("Wind graph: ", windage_graph[index], " / ", index)
+        # print("Made it here: 4")
+        stop = True
+        # if unit == 'yd':
+        #distance = distance*1.09361
+        # print("MIL Elevation Adjustment for " + str(distance) + "m is " + str(round(elevation_angle * 1000, 1)))
+        # print("MOA Elevation Adjustment for " + str(distance) + "m is " + str(round(elevation_angle * 1000 * 3.44, 1)))
+        # print("MIL Windage Adjustment for " + str(distance) + "m is " + str(round(windage_angle * 1000, 1)))
+        # print("MOA Windage Adjustment for " + str(distance) + "m is " + str(round(windage_angle * 1000 * 3.44, 1)))
+        adjustments["elevation"] = round(elevation_angle * 1000, 1)
+        adjustments["windage"] = round(windage_angle * 1000, 1)
+        #adjustments["elevation"] = round(elevation_angle * 1000, 1)
+        #adjustments["windage"] = round(windage_angle * 1000, 1)
+
+        # print("bullet drop: ", 39.3701*elevation_graph[index])
+        # print("length of elev:", len(elevation_graph))
+        # print("wind_deflection: ", 39.3701*windage_graph[index])
+        # print("length of wind:", len(windage_graph))
+        # print(distance_graph)
+
+
+        array_length = simTime / time_intereval
+        adjustments["elevation"] = 39.3701*elevation_graph[index]
+        adjustments["deflection"] = 39.3701*windage_graph[index]
+        dist_dict = {}
+        elev_dict = {}
+        wind_dict = {}
+        vel_dict= {}
+        dis_vel_dict = {}
+        for z in range(0, (len(time_graph)-1)):
+            dis_vel_dict[z] = str(distance_graph[z]*1.0936) + " yd, " + str(velocity_graph[z]*3.28) + " fps"
+            dist_dict[z] = distance_graph[z]
+            elev_dict[z] = elevation_graph[z]
+            wind_dict[z] = windage_graph[z]
+            vel_dict[z] = velocity_graph[z]*3.28
             
-            if(array_length < len(elevation_graph)):
-    
-                adjustments_arr = [39.3701*elevation_graph[index],39.3701*windage_graph[index],velocity[index]]
-    
-                adjustments_arr.sort()
-                return adjustments_arr
+        # # print("D dict: ", dist_dict)
+        # print("Index: ", index)
+        # print("E dict: ", elev_dict)
+        # print("W dict: ", wind_dict)
+        # # print("V dict: ", vel_dict)
+        print("O dict: ", dis_vel_dict, '\n')
+        
+        if(array_length < len(elevation_graph)):
+
+            adjustments_arr = [39.3701*elevation_graph[index],39.3701*windage_graph[index],velocity_graph[index]]
+
+            adjustments_arr.sort()
+            return adjustments_arr
 
         #return adjustments
 
@@ -284,3 +291,5 @@ if __name__ == "__main__":
     # while atmosphere[4] == None:
     #     atmosphere[4] = input("please enter air density: ")
     #     atmosphere[4] = float(atmosphere[4])
+    
+    #http://www.uwa.edu.au/
