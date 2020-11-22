@@ -4,6 +4,7 @@ import time
 import math
 import SimulatedConditions
 import Ballistics
+import FindZeroDistance
 #---------------------------------------------------------------------------------------------------------------
 
 def raise_frame(frame):
@@ -28,7 +29,7 @@ def Frame2Attributes(f2, cal, dia, coef, speed, dist, sight_height, zero_dist):
     range_text = "target range (yards): " + str(dist)
 
     # bullet[caliber, grainage, G1, velocity, range]
-    bullet = [float(cal), int(dia), float(coef), int(speed), int(dist)]
+    bullet = [float(cal), int(dia), float(coef), int(speed), int(dist), float(zero_dist), float(sight_height)]
     # atmosphere[crosswind, direction, elevation, windage, density]
 
     Label(f2, text = cal_text).grid(column = 1, row = 1)
@@ -108,17 +109,24 @@ def Frame2DynamicAttributes(bullet_speed, target_range, bullet):
     ball_pos = [0,0]
     count = 0
     current_dir = 45
+    density = 1.183
+    start_flag = True
+    elevation = 0
     while 1:
+        # if start_flag:
+        #     elevation = FindZeroDistance.Grapher(bullet, [0, 0, 0, 0, density])
+        
+        start_flag = False
         deflection1 = []
         windspeed = float(SimulatedConditions.windspeed(count, simlist))
         winddir = float(SimulatedConditions.winddir(count))
-        density = 1.183
+        
         # print("wind d: ", winddir, " / ", count)
 
         Label(f2, text = "wind speed is currently (MPH): ").grid(column= 1, row=6)
         Label(f2, text= windspeed).grid(column=2, row=6)
         
-        atmosphere = [windspeed, winddir, 0, 0, density]
+        atmosphere = [windspeed, winddir, elevation, 0, density]
 
         Label(f2, text="wind direction is currently (deg): ").grid(column=1, row=7)
         Label(f2, text=winddir).grid(column=2, row=7)
@@ -171,6 +179,7 @@ def BallCenter(coor):
 def BulletPhysicsWind(size, range1, iteration, position, bullet, atmosphere,f2): # atmosphere[crosswind, direction, elevation, windage, density]
     target_size = size/12
     deflection1 = Ballistics.trajectoryGraph(bullet, atmosphere) #-(wind_vect * (((test_time) - (range1 / speed)))) #deflection goes in the opposite direction of the wind direction
+    print("Def1 = ", deflection1)
     deflection1.sort()
     x_movement = [0,0]
 
@@ -259,22 +268,22 @@ root.geometry("650x550")
 
 Label(f1, text='Enter Bullet Diameter (in)').grid(column = 1, row = 1)
 cal_entry = Entry(f1,width = 5)
-cal_entry.insert(0,'0.30')
+cal_entry.insert(0,'0.308')
 cal_entry.grid(column = 2, row = 1)
 
 Label(f1, text='Enter Bullet Grain').grid(column = 1, row = 2)
 bullet_entry = Entry(f1,width = 5)
-bullet_entry.insert(0,'168')
+bullet_entry.insert(0,'195')
 bullet_entry.grid(column = 2, row = 2)
 
 Label(f1, text='Enter Ballistic Coefficient (G1)').grid(column = 1, row = 3)
 ballistic_entry = Entry(f1,width = 5)
-ballistic_entry.insert(0,'0.49')
+ballistic_entry.insert(0,'0.584')
 ballistic_entry.grid(column = 2, row = 3)
 
 Label(f1, text='Enter Bullet Velocity (FPS)').grid(column = 1, row = 4)
 velocity_entry = Entry(f1,width = 5)
-velocity_entry.insert(0,'2600')
+velocity_entry.insert(0,'2930')
 velocity_entry.grid(column = 2, row = 4)
 
 Label(f1, text='Enter Target Distance (yards)').grid(column = 1, row = 5)
