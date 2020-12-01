@@ -65,7 +65,7 @@ def trajectoryGraph(bullet, atmosphere):
     # Density of air
     air_density = atmosphere[4]
 
-    for t in range(1, steps + 1): # or range(1, steps + 2)
+    for t in range(0, steps + 1): # or range(1, steps + 2)
         # change to account for 3 different chunks of the range
         # change the wind at 30, 60, etc yards
         # Calculate BC for the velocity
@@ -76,8 +76,10 @@ def trajectoryGraph(bullet, atmosphere):
 
         # CALCULATE BULLET DROP AND VELOCITY
         currentTime = t * float(time_interval)
+        
         velocity_x_instant_updated = velocity_x_instant + time_interval * (
                     -0.5 * air_density * drag_coefficient * bullet_area * pow(velocity_x_instant, 2) / bullet_mass)
+        
         dist_x_instant_updated = dist_x_instant + time_interval * (velocity_x_instant)
 
         # Calculate Windage Effects (y direction, From right to left is positive direction)
@@ -103,6 +105,9 @@ def trajectoryGraph(bullet, atmosphere):
         # velocity_z_instant is instantaneous velocity in z direction at current distance downrange
         # dist_z_instant is displacement (height above reference) of bullet at current distance downrange
         velocity_z_instant = -9.8 * currentTime + velocity_z_initial
+        
+        # dynamic_z_speed = velocity_x_instant_updated * sin()
+        
         dist_z_instant = -4.905 * pow(currentTime, 2) + velocity_z_initial * currentTime + dist_z_initial #+ (dist_x_instant_updated*((bullet[6]/39.3701)/100))
 
         distance_graph.append(dist_x_instant_updated)
@@ -117,17 +122,20 @@ def trajectoryGraph(bullet, atmosphere):
         #                               windage_graph, simTime, time_interval)
         # return return_info
     returned_thing = calculation((bullet[4]/1.094), elevation_angle, windage_angle, elevation_graph, distance_graph,
-                    windage_graph, simTime, time_interval, velocity_graph, bullet[5], bullet[6])
+                    windage_graph, simTime, time_interval, velocity_graph, bullet[5], bullet[6], time_graph)
     #print("vertical: ", returned_thing[0], " horizontal: ", returned_thing[1], " vel: ", returned_thing[2]*3.281)
     return returned_thing
 # ---------------------------------------------------------------------------------------------------------------------------
 
-def calculation(distance, elevation_angle, windage_angle, elevation_graph, distance_graph, windage_graph, simTime, time_intereval, velocity_graph, sight_dist, sight_height):
+def calculation(distance, elevation_angle, windage_angle, elevation_graph, distance_graph, windage_graph, simTime, time_intereval, velocity_graph, sight_dist, sight_height, time_graph):
     adjustments = {"elevation": 0, "windage": 0}
     # If yards is used for desired distance, convert from meters
     # if unit == 'yd':
     #     distance = distance/1.09361
     #print("Distance Graph Full: ", distance_graph, " Len: ", len(distance_graph))
+    
+    
+    
     stop = False
     previous_elevation_angle = 0
     previous_windage_angle = 0
@@ -136,13 +144,14 @@ def calculation(distance, elevation_angle, windage_angle, elevation_graph, dista
         index = 0
         count = 0
         for item in distance_graph:
-            if math.fabs(round(item) - round(distance)) < 10.0:
+            if math.fabs(round(item) - round(distance)) < 1.0:
                 index = count
             else:
                 count += 1
+    
 
         bullet_drop = elevation_graph[index]
-        # print("Bullet drop: ", bullet_drop)
+        print("Bullet drop222: ", bullet_drop*39.3701, ' index: ', index, ' distance', distance_graph[index]*1.094)
         drop_adjustment = -1 * bullet_drop / distance
         # print("drop adjustment: ", drop_adjustment)
         wind_deflection = windage_graph[index]
@@ -175,11 +184,13 @@ def calculation(distance, elevation_angle, windage_angle, elevation_graph, dista
         elev_dict = {}
         wind_dict = {}
         vel_dict= {}
+        orig_dict = {}
         dis_vel_dict = {}
         distance_graph_upd = []
         elevation_graph_upt = []
         for z in range(0, array_length):
             dis_vel_dict[z] = str(round(distance_graph[z]*1.0936, 3)) + " yd, " + str(round(velocity_graph[z]*3.28,3)) + " fps " + str(round(39.3701*elevation_graph[z], 3)) + " in"
+            orig_dict[z] = str(distance_graph[z]) + " m, " + str(velocity_graph[z]) + " fps " + str(round(39.3701*elevation_graph[z], 3))+ " in"
             dist_dict[z] = distance_graph[z]
             elev_dict[z] = elevation_graph[z]*39.3701
             wind_dict[z] = windage_graph[z]
@@ -193,39 +204,104 @@ def calculation(distance, elevation_angle, windage_angle, elevation_graph, dista
         #print("E dict: ", elev_dict)
         # print("W dict: ", wind_dict)
         # # print("V dict: ", vel_dict)
-        print("O dict: ", dis_vel_dict, '\n')
+        # print("O dict: ", dis_vel_dict, '\n')
+        closest = 0.01
+        count1 = 0
+        the_point = 0
+        for item in elevation_graph_upt:
+            # print(math.fabs(item-sight_height), ' : ', count1)
+            if (math.fabs(item-sight_height) < closest) and (count1 > 60):
+                closest = math.fabs(sight_height-item)
+                the_point = count1
+            else:
+                count1 = count1 + 1
+                
+        # print('closestttt ', closest, ' : ', the_point)
+        
         
         if sight_dist < 110:
-            plt.plot(distance_graph_upd, elevation_graph_upt)
-            plt.ylim([-6, 3])
-            plt.xlim([0, 110])
+            plt.rcParams["figure.figsize"] = [16, 9]
+            fig = plt.figure(1)
+            ax = fig.add_subplot(111)
+            
+            plt.plot(distance_graph_upd, elevation_graph_upt, label = 'bullet')
+            plt.legend()
+            ymax = max(elevation_graph_upt)
+            xpos = elevation_graph_upt.index(ymax)
+            xmax = distance_graph_upd[xpos]
+            lab_string = "x: {}, y: {}".format(str(xmax), str(ymax))
+            ax2 = fig.add_subplot(111)
+            lab_string2 = "x: {}, y: {}".format(str(distance_graph_upd[the_point]), str(elevation_graph_upt[the_point]))
+            ax2.annotate(lab_string2, xy=(distance_graph_upd[the_point], elevation_graph_upt[the_point]),
+                         xytext=(distance_graph_upd[the_point], elevation_graph_upt[the_point] + .2),
+                         arrowprops=dict(facecolor='black', shrink=0.05), )
+            
+            ax.annotate(lab_string, xy=(xmax, ymax), xytext=(xmax, ymax + .2), arrowprops=dict(facecolor='black', shrink=0.05),)
+            plt.ylim([-1, 2.2])
+            plt.xlim([0, 200])
             plt.plot([0, 1500], [sight_height, sight_height], color='k', linestyle='-', linewidth=2)
             plt.axhline(c = 'red')
-            plt.rcParams["figure.figsize"] = [16, 9]
-            # plt.figure(figsize=(3, 4))
+            plt.axvline(x = 100, c='green')
+            # annot_max(distance_graph_upd, elevation_graph_upt)
+            # plt.show()
+            
+            
+            # plt.figure(2)
+            # fig1 = plt.figure(2)
+            # ax1 = fig1.add_subplot(111)
+            # plt.ylim([-1, 2.2])
+            # plt.xlim([0, 200])
+            # plt.rcParams["figure.figsize"] = [16, 9]
+            # plt.plot([0, 1500], [sight_height, sight_height], color='k', linestyle='-', linewidth=2)
+            # ymax1 = max(elevation_graph_upt)
+            # xpos1 = elevation_graph_upt.index(ymax1)
+            # xmax1 = time_graph[xpos1]
+            # lab_string1 = "x: {}, y: {}".format(str(xmax1), str(ymax1))
+            # ax1.annotate(lab_string1, xy=(xmax1, ymax1), xytext=(xmax1, ymax1 + .2),arrowprops=dict(facecolor='black', shrink=0.05), )
+            # ax3 = fig1.add_subplot(111)
+            # lab_string2 = "x: {}, y: {}".format(str(the_point), str(elevation_graph_upt[the_point]))
+            # ax3.annotate(lab_string2, xy=(the_point, elevation_graph_upt[the_point]),
+            #              xytext=(the_point, elevation_graph_upt[the_point] + .2),
+            #              arrowprops=dict(facecolor='black', shrink=0.05), )
+            # plt.axhline(c='red')
+            # plt.axvline(x=100, c='green')
+            # plt.plot(time_graph, elevation_graph_upt, label = 'time graph')
+            # # annot_max(time_graph, elevation_graph_upt)
             plt.show()
             exit
 
         else:
-            plt.plot(distance_graph_upd, elevation_graph_upt)
-            plt.ylim([-6, 6])
+            plt.rcParams["figure.figsize"] = [16, 9]
+            plt.plot(distance_graph_upd, elevation_graph_upt, label = 'bullet')
+            plt.legend()
+            plt.ylim([-10, 6])
             plt.xlim([0, 250])
             plt.axhline(c='red')
             plt.plot([0, 1500], [sight_height, sight_height], color='k', linestyle='-', linewidth=2)
-            plt.rcParams["figure.figsize"] = [16, 9]
+
             # plt.figure(figsize=(3, 4))
+            plt.axvline(x=200, c='green')
             plt.show()
             exit
         
         if(array_length-1 < len(elevation_graph)):
 
-            adjustments_arr = [39.3701*elevation_graph[index],39.3701*windage_graph[index],velocity_graph[index]]
+            adjustments_arr = [39.3701*elevation_graph[index],39.3701*windage_graph[index],velocity_graph[index]*3.28084]
 
             adjustments_arr.sort()
             return adjustments_arr
 
-        #return adjustments
-
+def annot_max(x,y, ax=None):
+    xmax = max(x)
+    ymax = max(y)#y.max()
+    text= "x={:.3f}, y={:.3f}".format(xmax, ymax)
+    if not ax:
+        ax=plt.gca()
+    bbox_props = dict(boxstyle="square,pad=0.3", fc="w", ec="k", lw=0.72)
+    arrowprops=dict(arrowstyle="->",connectionstyle="angle,angleA=0,angleB=60")
+    kw = dict(xycoords='data',textcoords="axes fraction",
+              arrowprops=arrowprops, bbox=bbox_props, ha="right", va="top")
+    ax.annotate(text, xy=(xmax, ymax), xytext=(0.94,0.96), **kw)
 
 # ---------------------------------------------------------------------------------------------------------------------------
 # def SendWindage():

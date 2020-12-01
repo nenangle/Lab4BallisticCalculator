@@ -20,16 +20,16 @@ def SubWindDir(current_wind):
     new_windD = current_wind - 1
     return new_windD
     
-def Frame2Attributes(f2, cal, dia, coef, speed, dist, sight_height, zero_dist):
+def Frame2Attributes(f2, cal, grn, coef, speed, dist, sight_height, zero_dist):
     raise_frame(f2)
     cal_text = "your caliber: " + str(cal)
-    dia_text = "your grainage: " + str(dia)
+    dia_text = "your grainage: " + str(grn)
     coef_text = "your coefficient: " + str(coef)
     dist_text = "muzzle velocity (FPS): " + str(speed)
     range_text = "target range (yards): " + str(dist)
-
-    # bullet[caliber, grainage, G1, velocity, range]
-    bullet = [float(cal), int(dia), float(coef), int(speed), int(dist), float(zero_dist), float(sight_height)]
+    #           0         1      2      3       4        5            6
+    # bullet[caliber, grainage, G1, velocity, range, zer0_dist, seight_height]
+    bullet = [float(cal), int(grn), float(coef), int(speed), int(dist), float(zero_dist), float(sight_height)]
     # atmosphere[crosswind, direction, elevation, windage, density]
 
     Label(f2, text = cal_text).grid(column = 1, row = 1)
@@ -111,10 +111,17 @@ def Frame2DynamicAttributes(bullet_speed, target_range, bullet):
     current_dir = 45
     density = 1.183
     start_flag = True
+    # elevation = 0.9816
+    # elevation = 0.9625
     elevation = 0
     while 1:
-        # if start_flag:
-        #     elevation = FindZeroDistance.Grapher(bullet, [0, 0, 0, 0, density])
+        if start_flag:
+            print('bullet', bullet[4])
+            elevation = FindZeroDistance.Grapher(bullet, [0, 0, 0, 0,density])
+            # print('elevation: ', elevation)
+            # elevation= 1-(math.sin(math.radians(elevation)))
+            # print('elevation: ', elevation)
+            # print('elevation sin: ', 1-(math.sin(math.radians(elevation))))
         
         start_flag = False
         deflection1 = []
