@@ -1,37 +1,67 @@
 import serial
 import time
 
-arduino = serial.Serial('COM4', 115200, timeout=.1)
 
-data_1, data_2, data_1_old, data_2_old = 0, 0 ,0, 0
+#      0            1           2          3      4         5        6         7           8             9
+# [wind_speed, wind_dir[0], wind_dir[1], temp, press[0], press[1], hum(%), bul_time[0], bul_time[1], shotcount]
+
+spec_gas_cont = 287.058
+arduino = serial.Serial('COM4', 115200, timeout=.1)
 while True:
 	data1 = list(arduino.readline())
-	
-	if len(data1) > 4:
-		data1.pop(len(data1) - 1)
-		data1.pop(len(data1) - 1)
-		if data1[0] == 2 and len(data1) == 3:
-			data_1 = data1
-			
-		elif data1[0] == 3 and len(data1) == 3:
-			data_2 = data1
-			
-		elif data1[0] == 2 and len(data1) == 5:
-			chrono_data1 = int.from_bytes([data1[3], data1[4]], byteorder='big')
-			fps = 1 / (chrono_data1 * 0.000001)
-			print("\nchrono: ", fps, " FPS\n")
-			time.sleep(1)
-			
-		elif data1[0] == 3 and len(data1) == 5:
-			chrono_data1 = int.from_bytes([data1[3], data1[4]], byteorder='big')
-			fps = 1/(chrono_data1*0.000001)
-			print("\nchrono: ", fps, " FPS\n")
-			time.sleep(1)
 
-	if (data_1 != data_1_old) and data_2:#(data_2 != data_2_old):
-		print("Transmitter 1: ", data_1, " Transmitter 2: ", data_2)
-	data_1_old = data_1
-	data_2_old = data_2
+	if len(data1) > 5:
+		data1.pop(len(data1) - 1)
+		data1.pop(len(data1) - 1)
+		print(data1)
+		
+		if data1[1] == 255:
+			data1[1] = 0
+		if data1[4] == 255:
+			data1[4] = 0
+		if data1[7] == 255:
+			data1[7] = 0
+		
+		temp = (data1[3] - 155) + 273.15
+		wind_d = int.from_bytes([data1[1], data1[2]], byteorder='big')
+		bullet_speed = int.from_bytes([data1[7], data1[8]], byteorder='big')
+		pressure = (int.from_bytes([data1[4], data1[5]], byteorder='big'))*100
+		air_density = pressure / (temp*spec_gas_cont)
+		# print('Wind Speed:', data1[0], 'Wind Dir: ', wind_d, 'Density:', air_density)
+		if wind_d == 1:
+			wind_d = 0
+		
+		if bullet_speed == 1:
+			bullet_speed = 0
+		# fps = 1 / (float(speed) * 0.000001)
+		
+	
+	
+	# if len(data1) > 4:
+	# 	data1.pop(len(data1) - 1)
+	# 	data1.pop(len(data1) - 1)
+	# 	if data1[0] == 2 and len(data1) == 3:
+	# 		data_1 = data1
+	#
+	# 	elif data1[0] == 3 and len(data1) == 3:
+	# 		data_2 = data1
+	#
+	# 	elif data1[0] == 2 and len(data1) == 5:
+	# 		chrono_data1 = int.from_bytes([data1[3], data1[4]], byteorder='big')
+	# 		fps = 1 / (chrono_data1 * 0.000001)
+	# 		print("\nchrono: ", fps, " FPS\n")
+	# 		time.sleep(1)
+	#
+	# 	elif data1[0] == 3 and len(data1) == 5:
+	# 		chrono_data1 = int.from_bytes([data1[3], data1[4]], byteorder='big')
+	# 		fps = 1/(chrono_data1*0.000001)
+	# 		print("\nchrono: ", fps, " FPS\n")
+	# 		time.sleep(1)
+	#
+	# if (data_1 != data_1_old) and data_2:#(data_2 != data_2_old):
+	# 	print("Transmitter 1: ", data_1, " Transmitter 2: ", data_2)
+	# data_1_old = data_1
+	# data_2_old = data_2
 	
 	
 	# print(data1)

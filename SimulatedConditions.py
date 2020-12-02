@@ -11,36 +11,16 @@ def LoadData():
         windlist.append(sheet.cell_value(i, 7))
     return windlist
 
-def windspeed(i, data_list):
+def windspeed():
     # wind_str = str(data_list[i])
-    wind_str = 0
-    time.sleep(.05)
+    wind_str = float
+
     return wind_str
 
-def winddir(c):
+def winddir():
     #for x in range(0, 1000):
-    if c < 20:
-        wind_d = 45 #from right
-        wind_di = str(wind_d)
-        time.sleep(.05)
-        return wind_di
-    elif c >= 20 and c < 40:
-        wind_d = 80
-        wind_di = str(wind_d)
-        time.sleep(.05)
-        return wind_di
-    elif c >= 40 and c < 60:
-        wind_d = 90
-        wind_di = str(wind_d)
-        time.sleep(.05)
-        return wind_di
-    else:
-        wind_d = 45
-        wind_di = str(wind_d)
-        time.sleep(.05)
-        return wind_di
+    wind_dir = (float)
         
-    
 
 def temp():
     for x in range(0, 1000):
