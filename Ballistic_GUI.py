@@ -123,6 +123,7 @@ def Frame2DynamicAttributes(bullet_speed, target_range, bullet):
     data = []
     while len(data) < 8:
         data = list(arduino.readline())
+        print(data)
         if len(data) > 8:
             shot_count = data[9]
             print('pre shot count: ', shot_count)
@@ -139,7 +140,7 @@ def Frame2DynamicAttributes(bullet_speed, target_range, bullet):
         else:
             data1 = [0]
 
-        if len(data1) >= 10 and done == True:
+        if (len(data1) >= 10 and len(data1) < 13) and done == True:
             done = False
             # print('length ', len(data1))
             data1.pop(len(data1) - 1)
@@ -157,7 +158,7 @@ def Frame2DynamicAttributes(bullet_speed, target_range, bullet):
                 pressure = (int.from_bytes([data1[4], data1[5]], byteorder='big')) * 100
                 air_density = pressure / (temp * spec_gas_cont)
                 print('bullet', bullet[4])
-                elevation = FindZeroDistance.Grapher(bullet, [0, 0, 0, 0, air_density])
+                # elevation = FindZeroDistance.Grapher(bullet, [0, 0, 0, 0, air_density])
             start_flag = False
 
             windspeed = data1[0]
@@ -195,9 +196,6 @@ def Frame2DynamicAttributes(bullet_speed, target_range, bullet):
             if bullet_speed == 1:
                 bullet_speed = 0
 
-
-
-
         atmosphere = [windspeed, wind_d, elevation, 0, air_density]
 
         Label(f2, text = "wind speed is currently (MPH): ").grid(column= 1, row=6)
@@ -211,8 +209,8 @@ def Frame2DynamicAttributes(bullet_speed, target_range, bullet):
 
 
 
-        move_x = BulletPhysicsWind(size, int(target_range), first_iteration, ball_pos, bullet, atmosphere,f2)
-        move_y = BulletPhysicsGravity(size, int(target_range), first_iteration, ball_pos, bullet, atmosphere,f2)
+        move_x = BulletPhysicsWind(size, int(target_range), first_iteration, ball_pos, bullet, atmosphere,f2, scale_factor)
+        move_y = BulletPhysicsGravity(size, int(target_range), first_iteration, ball_pos, bullet, atmosphere,f2, scale_factor)
 
         Label(f2, text="horizontal deflection: ").grid(column=1, row=11)
         Label(f2, text=str(round(move_x[0], 2))).grid(column=2, row=11)
@@ -237,8 +235,8 @@ def Frame2DynamicAttributes(bullet_speed, target_range, bullet):
         root.update()
         done = True
 
-        count += 1
-    
+#         count += 1
+#
 # def Frame2DynamicAttributes(bullet_speed, target_range, bullet):
 #     feet = 2
 #     inches = feet * 12
@@ -419,7 +417,7 @@ def BulletPhysicsGravity(size, range1, iteration, position, bullet, atmosphere, 
     target_size = size / 12
     drop, deflection, speed = Ballistics.trajectoryGraph(bullet,atmosphere)  # -(wind_vect * (((test_time) - (range1 / speed)))) #deflection goes in the opposite direction of the wind direction
 
-    print("Def2 = ", drop-bullet[6])
+    # print("Def2 = ", drop-bullet[6])
     y_movement = [0, 0]
     
     deflection = (drop-bullet[6])

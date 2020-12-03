@@ -9,7 +9,7 @@ import datetime
 
 def trajectoryGraph(bullet, atmosphere):
     simTime = 2
-    time_interval = .001
+    time_interval = .005
     # time_interval = .005
 
     time_graph = []
