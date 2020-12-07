@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from math import pow as pow
 import math,random
 import csv
-import datetime
+import time
 
 # bullet[caliber, grainage, G1, velocity, range]
 # atmosphere[crosswind, direction, elevation, windage, density]
@@ -10,14 +10,16 @@ import datetime
 def trajectoryGraph(bullet, atmosphere):
     simTime = 2
     time_interval = .005
-    # time_interval = .005
-
+    
     time_graph = []
     for m in range(0, int(simTime/time_interval)):
         time_graph.append(m)
     steps = int(math.floor(simTime / time_interval))
 
-    crosswind = (atmosphere[0])/3.28
+    # crosswind = (atmosphere[0])/3.28
+    
+    # crosswind = atmosphere[0]*1.467
+    crosswind = (atmosphere[0] * 1.467)/2.28
     windDirection = atmosphere[1]
     
     if windDirection < 180:
@@ -25,11 +27,17 @@ def trajectoryGraph(bullet, atmosphere):
 
     else:
         windDirection = windDirection - 180
+    
+    windDirection = windDirection - 90
+    
+    if windDirection < 0:
+        windDirection = abs(windDirection)
+    print(' Wind ', windDirection)
+    
+    if windDirection >= 203 and windDirection <= 248:
+        windDirection = windDirection - 180
         
-    velocity = bullet[3] / 3.281
-    elevation_angle = 0
-    # elevation_angle = atmosphere[2] / float(1000)
-
+    elevation_angle = atmosphere[2] / float(1000)
     windage_angle = atmosphere[3] / float(1000) # = 0
 
     distance_graph = []
@@ -40,10 +48,10 @@ def trajectoryGraph(bullet, atmosphere):
     # Initial Conditions
     # STD Units are m/s, if imperial (fps, mph) they are converted
     # Angles converted from degrees to radians
-
+    velocity = bullet[3] / 3.281
     V = velocity
-    windValue = crosswind * math.sin(windDirection * 0.0174533)
-    # windValue = crosswind * math.cos(windDirection * 0.0174533)
+    # windValue = crosswind * math.sin(windDirection * 0.0174533)
+    windValue = crosswind * math.cos(windDirection * 0.0174533)
 
     # Initial Distance  / Velocity [v] in X, Z components
     # (-1)*sin(Crosswind) since crosswind is defined as 90degrees opposing the bullet velocity
@@ -64,38 +72,30 @@ def trajectoryGraph(bullet, atmosphere):
 
     for t in range(0, steps + 1): # or range(1, steps + 2)
         reference_cd = dragCoefficient("G1", velocity_x_instant, 343)
-       # print("this: ",bullet_dia, " : ", math.pow(bullet_dia, 2.0), type(reference_cd), " : ", reference_cd)
         drag_coefficient = bullet_mass * reference_cd / bullet[2] / math.pow(bullet_dia, 2.0) * 0.0014223
+        # print(t,' Drag', drag_coefficient)
 
-        # CALCULATE BULLET DROP AND VELOCITY
         currentTime = t * float(time_interval)
         
         velocity_x_instant_updated = velocity_x_instant + time_interval * (
                     -0.5 * air_density * drag_coefficient * bullet_area * pow(velocity_x_instant, 2) / bullet_mass)
-        
         dist_x_instant_updated = dist_x_instant + time_interval * (velocity_x_instant)
 
-        # Calculate Windage Effects (y direction, From right to left is positive direction)
-        # Formula uses m/s for windspeed
-        # Initial windage adjustment
         dist_y_instant = dist_x_instant * windage_angle
         wind_deflection = (-1) * windValue * (t * time_interval - dist_x_instant / V)
         total_deflection = dist_y_instant - wind_deflection
-        # print('total def', total_deflection*39.371, ' : ', dist_x_instant_updated*1.0936)
-
 
         velocity_x_instant = velocity_x_instant_updated
-        #velocity_x_instant_updated = velocity_x_instant
-        
         dist_x_instant = dist_x_instant_updated
         
         dist_z_instant = -4.905 * pow(currentTime, 2) + velocity_z_initial * currentTime + dist_z_initial - (dist_x_instant_updated*((bullet[6]/39.3701)/100))
-
+        
         distance_graph.append(dist_x_instant_updated)
         elevation_graph.append(dist_z_instant)
         velocity_graph.append(velocity_x_instant_updated)
         windage_graph.append(total_deflection)
-
+        
+        # print(t, ': dist', round((dist_x_instant_updated*1.096), 4), ',  drop:', round((dist_z_instant*39.3701), 4), ',  speed:', round(velocity_x_instant_updated*3.28, 4))
     returned_thing = calculation((bullet[4]/1.0936), elevation_angle, windage_angle, elevation_graph, distance_graph,
                     windage_graph, simTime, time_interval, velocity_graph, bullet[5], bullet[6], time_graph)
     # print("vertical: ", returned_thing[0], " horizontal: ", returned_thing[1], " vel: ", returned_thing[2])
@@ -121,6 +121,7 @@ def calculation(distance, elevation_angle, windage_angle, elevation_graph, dista
             else:
                 count += 1
         
+        # print('Index: ', index, ' Dist: ', distance_graph[index]*1.0936)
 
         bullet_drop = elevation_graph[index]
         # print(' distance', distance_graph[index]*1.094, bullet_drop*39.3701, 'wind', windage_graph[index]*39.3701)
@@ -146,19 +147,23 @@ def calculation(distance, elevation_angle, windage_angle, elevation_graph, dista
         dis_vel_dict = {}
         distance_graph_upd = []
         elevation_graph_upt = []
+        velocity_graph_upd = []
+        windage_graph_upd = []
         for z in range(0, array_length):
             dis_vel_dict[z] = str(round(distance_graph[z]*1.0936, 3)) + " yd, " + str(round(velocity_graph[z]*3.28,3)) + " fps " + str(round(39.3701*elevation_graph[z], 3)) + " in"
             orig_dict[z] = str(distance_graph[z]) + " m, " + str(velocity_graph[z]) + " fps " + str(round(39.3701*elevation_graph[z], 3))+ " in"
-            dist_dict[z] = distance_graph[z]
-            elev_dict[z] = elevation_graph[z]*39.3701
-            wind_dict[z] = windage_graph[z]
-            vel_dict[z] = velocity_graph[z]*3.28
+ 
+            velocity_graph_upd.append(velocity_graph[z]*3.28)
             distance_graph_upd.append(distance_graph[z]*1.0936)
             elevation_graph_upt.append(elevation_graph[z]*39.3701)
+            windage_graph_upd.append(windage_graph[z]*39.3701)
             # print(dis_vel_dict[z])
-
-
-        
+        #
+        # print('Distance   (yd): ', round(distance_graph_upd[50], 3), round(distance_graph_upd[51], 3), round(distance_graph_upd[52], 3))
+        # # print('    Drop   (in): ', round(elevation_graph_upt[50], 3), round(elevation_graph_upt[51], 3), round(elevation_graph_upt[52], 3))
+        # print('Deflection (in): ', round(windage_graph_upd[50], 3), round(windage_graph_upd[51], 3),round(windage_graph_upd[52], 3))
+        # print('Velocity (ft/s): ', round(velocity_graph_upd[50], 1), round(velocity_graph_upd[51], 1), round(velocity_graph_upd[52], 1))
+        # print('\n')
         # closest = 0.01
         # count1 = 0
         # the_point = 0
@@ -169,8 +174,6 @@ def calculation(distance, elevation_angle, windage_angle, elevation_graph, dista
         #         the_point = count1
         #     else:
         #         count1 = count1 + 1
-        #
-        # print('closestttt ', closest, ' : ', the_point)
         #
         # if sight_dist < 110:
         #     plt.rcParams["figure.figsize"] = [16, 9]
@@ -188,14 +191,12 @@ def calculation(distance, elevation_angle, windage_angle, elevation_graph, dista
         #     ax2.annotate(lab_string2, xy=(distance_graph_upd[the_point], elevation_graph_upt[the_point]),
         #                  xytext=(distance_graph_upd[the_point], elevation_graph_upt[the_point] + .2),
         #                  arrowprops=dict(facecolor='black', shrink=0.05), )
-        #
         #     ax.annotate(lab_string, xy=(xmax, ymax), xytext=(xmax, ymax + .2), arrowprops=dict(facecolor='black', shrink=0.05),)
         #     plt.ylim([-1, 2.2])
         #     plt.xlim([0, 200])
         #     plt.plot([0, 1500], [sight_height, sight_height], color='k', linestyle='-', linewidth=2)
         #     plt.axhline(c = 'red')
         #     plt.axvline(x = 100, c='green')
-        #
         #     plt.show()
 
         #
@@ -238,10 +239,11 @@ def calculation(distance, elevation_angle, windage_angle, elevation_graph, dista
         #     exit
         #
         
-        adjustments_arr = [39.3701 * elevation_graph[index], 39.3701 * windage_graph[index], velocity_graph[index] * 3.28084]
+        # adjustments_arr = [39.3701 * elevation_graph[index], 39.3701 * windage_graph[index], velocity_graph[index] * 3.28084]
         # print(adjustments_arr)
         # print(adjustments_arr)
         # adjustments_arr.sort()
+        # print(39.3701 * elevation_graph[index], 39.3701 * windage_graph[index], velocity_graph[index] * 3.28084)
         return 39.3701 * elevation_graph[index], 39.3701 * windage_graph[index], velocity_graph[index] * 3.28084
         # if(array_length-1 < len(elevation_graph)):
         #     adjustments_arr = [39.3701*elevation_graph[index],39.3701*windage_graph[index],velocity_graph[index]*3.28084]
